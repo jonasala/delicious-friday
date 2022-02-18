@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/jonasala/delicious-friday/auth"
 	"github.com/jonasala/delicious-friday/mongo"
 )
@@ -13,6 +14,8 @@ func main() {
 	mongoURI := os.Getenv("DELICIOUS_FRIDAY_MONGO_URI")
 	dbName := os.Getenv("DELICIOUS_FRIDAY_DBNAME")
 	httpPort := os.Getenv("DELICIOUS_FRIDAY_HTTP_PORT")
+	jwtSecret := os.Getenv("DELICIOUS_FRIDAY_JWT_SECRET")
+
 	if httpPort == "" {
 		log.Fatalln("DELICIOUS_FRIDAY_HTTP_PORT is undefined")
 	}
@@ -21,6 +24,9 @@ func main() {
 	}
 	if dbName == "" {
 		log.Fatalln("DELICIOUS_FRIDAY_DBNAME is undefined")
+	}
+	if jwtSecret == "" {
+		log.Fatalln("DELICIOUS_FRIDAY_JWT_SECRET is undefined")
 	}
 
 	if err := mongo.Connect(mongoURI, dbName); err != nil {
@@ -32,6 +38,15 @@ func main() {
 	}
 
 	app := fiber.New()
+
+	apiGroup := app.Group("/api")
+	authGroup := apiGroup.Group("/auth")
+	restrictedGroup := apiGroup.Group("/restricted")
+	restrictedGroup.Use(jwtware.New(jwtware.Config{
+		SigningKey: []byte(jwtSecret),
+	}))
+
+	auth.RegisterPublicRoutes(authGroup)
 
 	if err := serveUI(app); err != nil {
 		log.Fatalln("unable to serve ui.", err)
