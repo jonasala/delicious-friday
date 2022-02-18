@@ -33,9 +33,17 @@ func main() {
 
 	app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"status": "OK", "message": "Welcome to this delicious friday"})
-	})
+	if err := serveUI(app); err != nil {
+		log.Fatalln("unable to serve ui.", err)
+	}
 
 	app.Listen(":" + httpPort)
+}
+
+func serveUI(app *fiber.App) error {
+	if _, err := os.Stat("./ui/dist"); err != nil {
+		return err
+	}
+	app.Static("/", "./ui/dist")
+	return nil
 }
