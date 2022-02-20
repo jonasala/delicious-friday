@@ -7,7 +7,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/jonasala/delicious-friday/auth"
-	"github.com/jonasala/delicious-friday/mongo"
+	"github.com/jonasala/delicious-friday/db"
+	"github.com/jonasala/delicious-friday/workorder"
 )
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 		log.Fatalln("DELICIOUS_FRIDAY_JWT_SECRET is undefined")
 	}
 
-	if err := mongo.Connect(mongoURI, dbName); err != nil {
+	if err := db.Connect(mongoURI, dbName); err != nil {
 		log.Fatalln("unable to connect with mongodb", err)
 	}
 
@@ -47,6 +48,8 @@ func main() {
 	}))
 
 	auth.RegisterPublicRoutes(authGroup)
+
+	workorder.RegisterRoutes(restrictedGroup)
 
 	if err := serveUI(app); err != nil {
 		log.Fatalln("unable to serve ui.", err)
