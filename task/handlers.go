@@ -112,7 +112,22 @@ func update(c *fiber.Ctx) error {
 }
 
 func delete(c *fiber.Ctx) error {
-	return c.SendString("delete")
+	objectID, err := primitive.ObjectIDFromHex(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	result := db.DB.Collection("tasks").FindOneAndDelete(c.Context(), bson.M{"_id": objectID})
+	if result.Err() == mongo.ErrNoDocuments {
+		return c.SendStatus(fiber.StatusNotFound)
+	} else if result.Err() != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
 }
 
 func create(c *fiber.Ctx) error {
