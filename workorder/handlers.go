@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func RegisterRoutes(router fiber.Router) {
@@ -98,7 +99,38 @@ func get(c *fiber.Ctx) error {
 }
 
 func list(c *fiber.Ctx) error {
-	return c.SendString("list work orders")
+	prefix := c.Query("prefix")
+	filter := bson.M{}
+	if prefix != "" {
+		filter = bson.M{
+			"number": bson.M{
+				"$regex": primitive.Regex{
+					Pattern: "^" + prefix,
+					Options: "i",
+				},
+			},
+		}
+	}
+
+	options := options.Find()
+	options.SetSort(bson.M{"created_at": -1})
+	options.SetLimit(5)
+
+	cursor, err := db.DB.Collection("work_orders").Find(c.Context(), filter, options)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	workOrders := []WorkOrder{}
+	if err := cursor.All(c.Context(), &workOrders); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(workOrders)
 }
 
 func delete(c *fiber.Ctx) error {
