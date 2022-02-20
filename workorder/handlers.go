@@ -79,22 +79,15 @@ func create(c *fiber.Ctx) error {
 }
 
 func get(c *fiber.Ctx) error {
-	objectID, err := primitive.ObjectIDFromHex(c.Params("id"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-	result := db.DB.Collection("work_orders").FindOne(c.Context(), bson.M{"_id": objectID})
-	if result.Err() == mongo.ErrNoDocuments {
+	wo, err := GetWorkOrder(c.Context(), c.Params("id"))
+	if err == mongo.ErrNoDocuments {
 		return c.SendStatus(fiber.StatusNotFound)
-	} else if result.Err() != nil {
+	} else if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
-	wo := new(WorkOrder)
-	result.Decode(wo)
+
 	return c.JSON(wo)
 }
 

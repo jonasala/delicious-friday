@@ -8,6 +8,7 @@ import (
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/jonasala/delicious-friday/auth"
 	"github.com/jonasala/delicious-friday/db"
+	"github.com/jonasala/delicious-friday/task"
 	"github.com/jonasala/delicious-friday/workorder"
 )
 
@@ -48,8 +49,8 @@ func main() {
 	}))
 
 	auth.RegisterPublicRoutes(authGroup)
-
 	workorder.RegisterRoutes(restrictedGroup)
+	task.RegisterRoutes(restrictedGroup)
 
 	if err := serveUI(app); err != nil {
 		log.Fatalln("unable to serve ui.", err)
