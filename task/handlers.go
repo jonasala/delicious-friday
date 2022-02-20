@@ -108,7 +108,54 @@ func get(c *fiber.Ctx) error {
 }
 
 func update(c *fiber.Ctx) error {
-	return c.SendString("update")
+	objectID, err := primitive.ObjectIDFromHex(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	reqPayload := new(CreateUpdateRequest)
+	if err := c.BodyParser(reqPayload); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if errors := reqPayload.Validate(); errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+
+	var wo *workorder.WorkOrder
+	if reqPayload.WorkOrder != "" {
+		var err error
+		wo, err = workorder.GetWorkOrder(c.Context(), reqPayload.WorkOrder)
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"message": "work order not found",
+			})
+		} else if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+	}
+
+	result := db.DB.Collection("tasks").FindOneAndUpdate(c.Context(), bson.M{"_id": objectID}, bson.M{
+		"$set": bson.M{
+			"work_order":  wo,
+			"description": reqPayload.Description,
+		},
+	})
+	if result.Err() == mongo.ErrNoDocuments {
+		return c.SendStatus(fiber.StatusNotFound)
+	} else if result.Err() != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": result.Err().Error(),
+		})
+	}
+
+	return get(c)
 }
 
 func delete(c *fiber.Ctx) error {
