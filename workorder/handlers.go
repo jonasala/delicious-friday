@@ -21,6 +21,7 @@ func RegisterRoutes(router fiber.Router) {
 	group.Get("/", list)
 	group.Get("/:id", get)
 	group.Post("/", create)
+	group.Delete("/:id", delete)
 }
 
 func create(c *fiber.Ctx) error {
@@ -98,4 +99,23 @@ func get(c *fiber.Ctx) error {
 
 func list(c *fiber.Ctx) error {
 	return c.SendString("list work orders")
+}
+
+func delete(c *fiber.Ctx) error {
+	objectID, err := primitive.ObjectIDFromHex(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	result := db.DB.Collection("work_orders").FindOneAndDelete(c.Context(), bson.M{"_id": objectID})
+	if result.Err() == mongo.ErrNoDocuments {
+		return c.SendStatus(fiber.StatusNotFound)
+	} else if result.Err() != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
 }
