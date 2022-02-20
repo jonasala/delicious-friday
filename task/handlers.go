@@ -25,7 +25,16 @@ func list(c *fiber.Ctx) error {
 }
 
 func get(c *fiber.Ctx) error {
-	return c.SendString("get")
+	task, err := GetTask(c.Context(), c.Params("id"))
+	if err == mongo.ErrNoDocuments {
+		return c.SendStatus(fiber.StatusNotFound)
+	} else if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(task)
 }
 
 func update(c *fiber.Ctx) error {
