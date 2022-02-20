@@ -16,3 +16,9 @@
 
 #application users
 users.json
+
+#work orders files
+files/work-orders/*
+
+#keep the gitkeep
+!.gitkeep
