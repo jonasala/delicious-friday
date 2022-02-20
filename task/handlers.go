@@ -7,8 +7,10 @@ import (
 	"github.com/jonasala/delicious-friday/common"
 	"github.com/jonasala/delicious-friday/db"
 	"github.com/jonasala/delicious-friday/workorder"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func RegisterRoutes(router fiber.Router) {
@@ -21,7 +23,75 @@ func RegisterRoutes(router fiber.Router) {
 }
 
 func list(c *fiber.Ctx) error {
-	return c.SendString("list")
+	search := c.Query("search")
+	all := c.Query("all") == "1"
+	page, perPage, err := common.PaginationInfo(c)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	resultset := common.Resultset{
+		Page:         page,
+		ItemsPerPage: perPage,
+	}
+
+	filters := bson.M{}
+	if !all {
+		filters["created_by"] = common.UserFromContext(c).Username
+	}
+	if search != "" {
+		filters["$or"] = bson.A{
+			bson.M{"created_by": search},
+			bson.M{"work_order.number": bson.M{
+				"$regex": primitive.Regex{
+					Pattern: "^" + search,
+					Options: "i",
+				},
+			},
+			},
+			bson.M{"description": bson.M{
+				"$regex": primitive.Regex{
+					Pattern: search,
+					Options: "i",
+				},
+			}},
+		}
+	}
+
+	total, err := db.DB.Collection("tasks").CountDocuments(c.Context(), filters)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	resultset.TotalItems = int(total)
+	resultset.Calculate()
+
+	options := options.Find()
+	options.SetSort(bson.M{"created_at": -1})
+	options.SetLimit(int64(resultset.ItemsPerPage))
+	options.SetSkip(int64(resultset.Offset))
+
+	cursor, err := db.DB.Collection("tasks").Find(c.Context(), filters, options)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	tasks := []Task{}
+	if err := cursor.All(c.Context(), &tasks); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	resultset.Data = tasks
+	return c.JSON(resultset)
+
 }
 
 func get(c *fiber.Ctx) error {
