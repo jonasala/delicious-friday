@@ -10,8 +10,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/jonasala/delicious-friday/common"
-	"github.com/jonasala/delicious-friday/mongo"
+	"github.com/jonasala/delicious-friday/db"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func RegisterRoutes(router fiber.Router) {
@@ -62,7 +64,7 @@ func create(c *fiber.Ctx) error {
 		CreatedAt: time.Now(),
 		CreatedBy: common.UserFromContext(c).Username,
 	}
-	result, err := mongo.DB.Collection("work_orders").InsertOne(c.Context(), wo)
+	result, err := db.DB.Collection("work_orders").InsertOne(c.Context(), wo)
 	if err != nil {
 		os.Remove("./" + filepath)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -75,7 +77,23 @@ func create(c *fiber.Ctx) error {
 }
 
 func get(c *fiber.Ctx) error {
-	return c.SendString("get work order")
+	objectID, err := primitive.ObjectIDFromHex(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	result := db.DB.Collection("work_orders").FindOne(c.Context(), bson.M{"_id": objectID})
+	if result.Err() == mongo.ErrNoDocuments {
+		return c.SendStatus(fiber.StatusNotFound)
+	} else if result.Err() != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	wo := new(WorkOrder)
+	result.Decode(wo)
+	return c.JSON(wo)
 }
 
 func list(c *fiber.Ctx) error {
