@@ -2,6 +2,8 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
+import MainToolbar from '../toolbars/MainToolbar.vue';
+import MainDrawer from '../drawers/MainDrawer.vue';
 
 Vue.use(VueRouter);
 
@@ -9,13 +11,18 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView,
+    components: {
+      drawer: MainDrawer,
+      toolbar: MainToolbar,
+      default: HomeView,
+    },
   },
   {
     path: '/login',
     name: 'login',
     components: {
       toolbar: null,
+      drawer: null,
       default: LoginView,
     },
   },

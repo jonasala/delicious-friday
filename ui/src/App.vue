@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <router-view name="drawer" />
     <router-view name="toolbar" />
     <v-main>
       <router-view />

@@ -6,6 +6,11 @@ export default {
       color: '',
       text: '',
     },
+    toolbar: {
+      title: '',
+      search: false,
+    },
+    drawer: null,
   },
   mutations: {
     setSnackbar(state, options) {
@@ -15,6 +20,12 @@ export default {
     },
     closeSnackbar(state) {
       state.snackbar.open = false;
+    },
+    setToolbar(state, toolbar) {
+      state.toolbar = toolbar;
+    },
+    setDrawer(state, open) {
+      state.drawer = open;
     },
   },
   actions: {},

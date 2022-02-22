@@ -75,6 +75,9 @@ export default {
       return errors;
     },
   },
+  mounted() {
+    document.title = 'Login - D3V Controle de Tarefas';
+  },
   methods: {
     async login() {
       try {
