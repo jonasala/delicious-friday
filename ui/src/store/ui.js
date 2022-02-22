@@ -9,6 +9,7 @@ export default {
     toolbar: {
       title: '',
       search: false,
+      searchText: '',
     },
     drawer: null,
   },
@@ -26,6 +27,9 @@ export default {
     },
     setDrawer(state, open) {
       state.drawer = open;
+    },
+    setSearchText(state, text) {
+      state.toolbar.searchText = text;
     },
   },
   actions: {},
