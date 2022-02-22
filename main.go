@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/jonasala/delicious-friday/auth"
 	"github.com/jonasala/delicious-friday/db"
@@ -40,6 +41,7 @@ func main() {
 	}
 
 	app := fiber.New()
+	app.Use(cors.New())
 
 	apiGroup := app.Group("/api")
 	authGroup := apiGroup.Group("/auth")
