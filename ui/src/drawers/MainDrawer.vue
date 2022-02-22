@@ -1,13 +1,13 @@
 <template>
   <v-navigation-drawer v-model="drawer" app>
-    <v-list two-line>
+    <v-list two-line v-if="activeUser">
       <v-list-item>
         <v-list-item-avatar color="grey">
           <v-icon>mdi-account</v-icon>
         </v-list-item-avatar>
         <v-list-item-content>
-          <v-list-item-title>Jonas Sala</v-list-item-title>
-          <v-list-item-subtitle>jonas.sala</v-list-item-subtitle>
+          <v-list-item-title>{{ activeUser.name }}</v-list-item-title>
+          <v-list-item-subtitle>{{ activeUser.username }}</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
     </v-list>
@@ -45,6 +45,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   data() {
     return {
@@ -52,6 +54,9 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      activeUser: (state) => state.users.activeUser,
+    }),
     drawer: {
       get() {
         return this.$store.state.ui.drawer;
