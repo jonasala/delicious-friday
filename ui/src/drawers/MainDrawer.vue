@@ -14,7 +14,7 @@
     <v-divider />
     <v-list nav dense>
       <v-list-item-group v-model="selectedItem" color="primary">
-        <v-list-item value="my-tasks">
+        <v-list-item value="my-tasks" :to="{ name: 'my-tasks' }">
           <v-list-item-icon>
             <v-icon>mdi-format-list-bulleted</v-icon>
           </v-list-item-icon>
@@ -22,7 +22,7 @@
             <v-list-item-title>Minhas tarefas</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item value="all-tasks">
+        <v-list-item value="all-tasks" :to="{ name: 'all-tasks' }">
           <v-list-item-icon>
             <v-icon>mdi-format-list-bulleted-type</v-icon>
           </v-list-item-icon>
@@ -64,11 +64,6 @@ export default {
       set(open) {
         this.$store.commit('ui/setDrawer', open);
       },
-    },
-  },
-  watch: {
-    selectedItem(to) {
-      this.$router.push({ name: to });
     },
   },
 };
