@@ -12,6 +12,7 @@
         append-outer-icon="mdi-file-eye-outline"
         @click:append-outer="woDetails()"
         no-data-text="Nenhuma ordem de serviço encontrada"
+        :search-input.sync="searchWO"
       >
         <template v-slot:append-item>
           <v-list-item>
@@ -43,6 +44,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import WorkOrderForm from '../components/WorkOrderForm.vue';
 
 export default {
@@ -58,6 +60,10 @@ export default {
       loadingWO: false,
       workOrders: [],
       dialogWO: false,
+      searchWO: null,
+      debouncedSearch: _.debounce((vm, val) => {
+        vm.loadWorkOrders(val);
+      }, 500),
     };
   },
   mounted() {
@@ -70,17 +76,15 @@ export default {
     save() {
       return false;
     },
-    loadWorkOrders() {
+    async loadWorkOrders(prefix) {
       try {
         this.loadingWO = true;
-        setTimeout(() => {
-          this.workOrders = ['11111', '22222', '333333', '444444', '555555'];
-          this.loadingWO = false;
-        }, 2000);
+        const wo = await this.$store.dispatch('workOrders/loadWorkOrders', prefix);
+        this.workOrders = wo.map((i) => i.number);
       } catch (err) {
         console.log(err);
       } finally {
-        //
+        this.loadingWO = false;
       }
     },
     woDetails() {
@@ -92,6 +96,9 @@ export default {
       if (val) {
         this.$set(this.task, 'work_order', '');
       }
+    },
+    searchWO(val) {
+      this.debouncedSearch(this, val);
     },
   },
 };
