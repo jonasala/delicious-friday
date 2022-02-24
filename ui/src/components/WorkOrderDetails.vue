@@ -7,7 +7,7 @@
       <v-toolbar-title>Ordem {{ wo.number }}</v-toolbar-title>
     </v-toolbar>
     <v-card-text class="px-0">
-      <v-list two-line dense>
+      <v-list two-line>
         <v-list-item>
           <v-list-item-content>
             <v-list-item-subtitle>Criado por</v-list-item-subtitle>

@@ -1,3 +1,5 @@
+import Vue from 'vue';
+
 export default {
   namespaced: true,
   state: {
@@ -29,7 +31,7 @@ export default {
       state.drawer = open;
     },
     setSearchText(state, text) {
-      state.toolbar.searchText = text;
+      Vue.set(state.toolbar, 'searchText', text);
     },
   },
   actions: {},

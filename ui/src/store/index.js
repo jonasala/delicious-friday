@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import ui from './ui';
 import users from './users';
 import workOrders from './work-orders';
+import tasks from './tasks';
 
 Vue.use(Vuex);
 
@@ -12,5 +13,6 @@ export default new Vuex.Store({
     ui,
     users,
     workOrders,
+    tasks,
   },
 });

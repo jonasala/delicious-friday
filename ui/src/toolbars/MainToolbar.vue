@@ -16,6 +16,7 @@
       flat
       single-line
       hide-details
+      clearable
       placeholder="Digite qualquer coisa a respeito da tarefa"
       v-model="searchText"
     />

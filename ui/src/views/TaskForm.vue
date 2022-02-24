@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-form @submit.prevent="save()">
       <v-checkbox label="Tarefa sem ordem de serviço" v-model="withoutWO" :disabled="loading" />
       <v-autocomplete
