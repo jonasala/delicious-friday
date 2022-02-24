@@ -54,9 +54,11 @@ func main() {
 	workorder.RegisterRoutes(restrictedGroup)
 	task.RegisterRoutes(restrictedGroup)
 
+	app.Static("/files", "./files")
 	if err := serveUI(app); err != nil {
 		log.Fatalln("unable to serve ui.", err)
 	}
+
 
 	app.Listen(":" + httpPort)
 }
