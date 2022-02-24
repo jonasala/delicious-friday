@@ -6,13 +6,16 @@
         filled
         label="Ordem de serviço"
         v-model="task.work_order"
-        :disabled="withoutWO || loading"
+        :disabled="withoutWO || loading || loadingWO"
         :loading="loadingWO"
         :items="workOrders"
+        item-text="number"
+        item-value="id"
         append-outer-icon="mdi-file-eye-outline"
         @click:append-outer="woDetails()"
         no-data-text="Nenhuma ordem de serviço encontrada"
         :search-input.sync="searchWO"
+        clearable
       >
         <template v-slot:append-item>
           <v-list-item>
@@ -40,15 +43,24 @@
     <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogWO">
       <work-order-form @close="dialogWO = false" />
     </v-dialog>
+    <v-dialog
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+      v-model="dialogWODetail"
+    >
+      <work-order-details @close="dialogWODetail = false" v-if="selectedWO" :wo="selectedWO" />
+    </v-dialog>
   </v-container>
 </template>
 
 <script>
 import _ from 'lodash';
 import WorkOrderForm from '../components/WorkOrderForm.vue';
+import WorkOrderDetails from '../components/WorkOrderDetails.vue';
 
 export default {
-  components: { WorkOrderForm },
+  components: { WorkOrderForm, WorkOrderDetails },
   data() {
     return {
       task: {
@@ -59,11 +71,13 @@ export default {
       loading: false,
       loadingWO: false,
       workOrders: [],
+      dialogWODetail: false,
       dialogWO: false,
       searchWO: null,
       debouncedSearch: _.debounce((vm, val) => {
         vm.loadWorkOrders(val);
       }, 500),
+      selectedWO: null,
     };
   },
   mounted() {
@@ -79,16 +93,29 @@ export default {
     async loadWorkOrders(prefix) {
       try {
         this.loadingWO = true;
-        const wo = await this.$store.dispatch('workOrders/loadWorkOrders', prefix);
-        this.workOrders = wo.map((i) => i.number);
+        this.workOrders = await this.$store.dispatch('workOrders/loadWorkOrders', prefix);
       } catch (err) {
         console.log(err);
       } finally {
         this.loadingWO = false;
       }
     },
-    woDetails() {
-      //
+    async woDetails() {
+      if (!this.task.work_order) {
+        return;
+      }
+      try {
+        this.loadingWO = true;
+        this.selectedWO = await this.$store.dispatch(
+          'workOrders/getWorkOrder',
+          this.task.work_order,
+        );
+        this.dialogWODetail = true;
+      } catch (err) {
+        console.log(err);
+      } finally {
+        this.loadingWO = false;
+      }
     },
   },
   watch: {

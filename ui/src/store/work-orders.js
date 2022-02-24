@@ -11,5 +11,13 @@ export default {
         return Promise.reject(err);
       }
     },
+    async getWorkOrder(_, number) {
+      try {
+        const response = await window.securedAxios.get(`/api/restricted/work-orders/${number}`);
+        return response.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
   },
 };
