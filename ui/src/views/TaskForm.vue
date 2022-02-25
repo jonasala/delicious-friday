@@ -41,7 +41,7 @@
       </v-btn>
     </v-form>
     <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogWO">
-      <work-order-form @close="dialogWO = false" />
+      <work-order-form @close="dialogWO = false" @create="createdWO" />
     </v-dialog>
     <v-dialog
       fullscreen
@@ -116,6 +116,11 @@ export default {
       } finally {
         this.loadingWO = false;
       }
+    },
+    createdWO(wo) {
+      this.workOrders = [wo];
+      this.task.work_order = wo.id;
+      this.dialogWO = false;
     },
   },
   watch: {

@@ -19,5 +19,15 @@ export default {
         return Promise.reject(err);
       }
     },
+    async createWorkOrder(_, formData) {
+      try {
+        const response = await window.securedAxios.post('/api/restricted/work-orders', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
   },
 };
