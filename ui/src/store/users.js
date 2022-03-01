@@ -24,6 +24,7 @@ export default {
       commit('setActiveUser', null);
       localStorage.removeItem('authToken');
       localStorage.removeItem('activeUser');
+      window.location.reload();
     },
   },
 };

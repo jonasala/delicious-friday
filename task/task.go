@@ -11,7 +11,7 @@ import (
 )
 
 type Task struct {
-	ID          primitive.ObjectID   `bson:"_id" json:"id"`
+	ID          primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
 	WorkOrder   *workorder.WorkOrder `bson:"work_order" json:"work_order"`
 	Description string               `bson:"description" json:"description"`
 	CreatedBy   string               `bson:"created_by" json:"created_by"`

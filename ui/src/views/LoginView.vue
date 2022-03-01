@@ -75,6 +75,9 @@ export default {
       return errors;
     },
   },
+  mounted() {
+    document.title = 'Login - D3V Controle de Tarefas';
+  },
   methods: {
     async login() {
       try {
@@ -82,7 +85,7 @@ export default {
         if (!this.$v.$invalid) {
           this.loading = true;
           await this.$store.dispatch('users/login', this.user);
-          this.$router.replace({ name: 'home' });
+          this.$router.replace({ name: 'my-tasks' });
         }
       } catch (err) {
         if (err.response && err.response.status === 401) {

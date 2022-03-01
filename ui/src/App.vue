@@ -1,8 +1,11 @@
 <template>
   <v-app>
+    <router-view name="drawer" />
     <router-view name="toolbar" />
     <v-main>
-      <router-view />
+      <v-slide-x-transition mode="out-in">
+        <router-view />
+      </v-slide-x-transition>
     </v-main>
     <v-snackbar v-model="snackbarOpen" :color="snackbar.color" :timeout="4000" top right multi-line>
       <v-icon class="mr-2">{{ snackbarIcon() }}</v-icon>

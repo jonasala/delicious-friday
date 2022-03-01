@@ -1,3 +1,5 @@
+import Vue from 'vue';
+
 export default {
   namespaced: true,
   state: {
@@ -6,6 +8,12 @@ export default {
       color: '',
       text: '',
     },
+    toolbar: {
+      title: '',
+      search: false,
+      searchText: '',
+    },
+    drawer: null,
   },
   mutations: {
     setSnackbar(state, options) {
@@ -15,6 +23,15 @@ export default {
     },
     closeSnackbar(state) {
       state.snackbar.open = false;
+    },
+    setToolbar(state, toolbar) {
+      state.toolbar = toolbar;
+    },
+    setDrawer(state, open) {
+      state.drawer = open;
+    },
+    setSearchText(state, text) {
+      Vue.set(state.toolbar, 'searchText', text);
     },
   },
   actions: {},
