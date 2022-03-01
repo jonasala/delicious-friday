@@ -16,6 +16,9 @@
         no-data-text="Nenhuma ordem de serviço encontrada"
         :search-input.sync="searchWO"
         clearable
+        @blur="$v.task.work_order && $v.task.work_order.$touch()"
+        @input="$v.task.work_order && $v.task.work_order.$touch()"
+        :error-messages="woErrors"
       >
         <template v-slot:append-item>
           <v-list-item>
@@ -34,6 +37,9 @@
         label="Descrição"
         v-model="task.description"
         :disabled="loading"
+        @blur="$v.task.description && $v.task.description.$touch()"
+        @input="$v.task.description && $v.task.description.$touch()"
+        :error-messages="descriptionErrors"
       />
       <v-btn block color="primary" type="submit" large :loading="loading">
         <v-icon class="mr-2">mdi-check</v-icon>
@@ -56,6 +62,7 @@
 
 <script>
 import _ from 'lodash';
+import { required } from 'vuelidate/lib/validators';
 import WorkOrderForm from '../components/WorkOrderForm.vue';
 import WorkOrderDetails from '../components/WorkOrderDetails.vue';
 
@@ -80,6 +87,36 @@ export default {
       selectedWO: null,
     };
   },
+  validations() {
+    if (this.withoutWO) {
+      return { task: { description: { required } } };
+    }
+    return { task: { work_order: { required } } };
+  },
+  computed: {
+    woErrors() {
+      const errors = [];
+      if (this.withoutWO || !this.$v.task.work_order.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.task.work_order.required) {
+        errors.push('Informe a ordem de serviço.');
+      }
+      return errors;
+    },
+    descriptionErrors() {
+      const errors = [];
+      if (!this.withoutWO || !this.$v.task.description.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.task.description.required) {
+        errors.push('A descrição é obrigatória quando não é informada a ordem de serviço.');
+      }
+      return errors;
+    },
+  },
   mounted() {
     this.$store.commit('ui/setToolbar', { title: 'Nova Tarefa' });
     document.title = 'Nova Tarefa - Controle de Tarefas';
@@ -87,8 +124,24 @@ export default {
     this.loadWorkOrders();
   },
   methods: {
-    save() {
-      return false;
+    async save() {
+      this.$v.$touch();
+      if (this.$v.$invalid) {
+        return;
+      }
+      try {
+        this.loading = true;
+        await this.$store.dispatch('tasks/create', this.task);
+        this.$store.commit('ui/setSnackbar', {
+          text: 'Tarefa criada com sucesso',
+          color: 'success',
+        });
+        this.$router.back();
+      } catch (err) {
+        console.log(err);
+      } finally {
+        this.loading = false;
+      }
     },
     async loadWorkOrders(prefix) {
       try {
@@ -131,6 +184,9 @@ export default {
     },
     searchWO(val) {
       this.debouncedSearch(this, val);
+    },
+    task() {
+      this.$v.$reset();
     },
   },
 };

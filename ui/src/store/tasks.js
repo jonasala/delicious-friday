@@ -13,5 +13,13 @@ export default {
         return Promise.reject(err);
       }
     },
+    async create(_, payload) {
+      try {
+        const response = await window.securedAxios.post('/api/restricted/tasks', payload);
+        return response.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
   },
 };
