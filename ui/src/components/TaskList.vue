@@ -29,7 +29,12 @@
       </template>
     </v-list>
     <v-dialog v-model="dialogTask" width="500">
-      <task-details v-if="dialogTask" :task="activeTask" @close="dialogTask = null" />
+      <task-details
+        v-if="dialogTask"
+        :task="activeTask"
+        @close="dialogTask = null"
+        @delete="taskDeleted"
+      />
     </v-dialog>
   </div>
 </template>
@@ -104,6 +109,10 @@ export default {
     debouncedSearch: _.debounce((vm) => {
       vm.loadTasks();
     }, 500),
+    taskDeleted() {
+      this.dialogTask = false;
+      this.loadTasks();
+    },
   },
   watch: {
     search() {

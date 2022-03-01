@@ -42,7 +42,24 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer />
-      <v-btn depressed color="error"> <v-icon left>mdi-delete</v-icon> Excluir </v-btn>
+      <v-dialog persistent v-model="dialogDelete" width="600">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-bind="attrs" v-on="on" color="error">
+            <v-icon left>mdi-delete</v-icon>Excluir
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-title> Excluir tarefa </v-card-title>
+          <v-card-text> Tem certeza que deseja excluir esta tarefa? </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn depressed @click="dialogDelete = false" :disabled="deleting">Cancelar</v-btn>
+            <v-btn color="error" :loading="deleting" @click="deleteTask()">
+              <v-icon left>mdi-delete</v-icon>Excluir
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       <v-btn depressed color="primary"><v-icon left>mdi-pencil</v-icon> Editar</v-btn>
     </v-card-actions>
     <v-dialog
@@ -67,11 +84,28 @@ export default {
   data() {
     return {
       dialogWODetails: false,
+      dialogDelete: false,
+      deleting: false,
     };
   },
   methods: {
     format(datetime) {
       return DateTime.fromISO(datetime).toLocaleString(DateTime.DATETIME_MED);
+    },
+    async deleteTask() {
+      try {
+        this.deleting = true;
+        await this.$store.dispatch('tasks/delete', this.task.id);
+        this.$store.commit('ui/setSnackbar', {
+          text: 'Tarefa excluída com sucesso',
+          color: 'success',
+        });
+        this.$emit('delete');
+      } catch (err) {
+        console.log(err);
+      } finally {
+        this.deleting = false;
+      }
     },
   },
 };

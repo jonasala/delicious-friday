@@ -21,5 +21,13 @@ export default {
         return Promise.reject(err);
       }
     },
+    async delete(_, id) {
+      try {
+        const response = await window.securedAxios.delete(`/api/restricted/tasks/${id}`);
+        return response.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
   },
 };
