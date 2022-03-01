@@ -46,8 +46,7 @@ sAxios.interceptors.response.use(
         text: 'Problemas de conexão com o servidor. Tente novamente mais tarde.',
       });
     } else if (error.response.status === 401) {
-      store.dispatch('logout');
-      window.location.reload();
+      store.dispatch('users/logout');
       return Promise.reject(error);
     }
     return Promise.reject(error);
