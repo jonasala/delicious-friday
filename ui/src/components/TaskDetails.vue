@@ -60,7 +60,6 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-btn depressed color="primary"><v-icon left>mdi-pencil</v-icon> Editar</v-btn>
     </v-card-actions>
     <v-dialog
       v-if="task.work_order"
