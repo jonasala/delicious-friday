@@ -22,3 +22,6 @@ files/work-orders/*
 
 #keep the gitkeep
 !.gitkeep
+
+#env file for docker compose
+.env

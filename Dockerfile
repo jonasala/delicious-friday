@@ -1,0 +1,21 @@
+FROM golang:1.17
+WORKDIR /app/src
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+
+FROM node:14
+ENV VUE_APP_SERVER_URL=${DELICIOUS_FRIDAY_SERVER_URL}
+WORKDIR /app/src
+COPY --from=0 /app/src .
+WORKDIR /app/src/ui/dist
+RUN npm install && npm run build
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+ENV DELICIOUS_FRIDAY_MONGO_URI=${DELICIOUS_FRIDAY_MONGO_URI}
+ENV DELICIOUS_FRIDAY_DBNAME=${DELICIOUS_FRIDAY_DBNAME}
+ENV DELICIOUS_FRIDAY_HTTP_PORT=${DELICIOUS_FRIDAY_HTTP_PORT}
+ENV DELICIOUS_FRIDAY_JWT_SECRET=${DELICIOUS_FRIDAY_JWT_SECRET}
+WORKDIR /root/
+COPY --from=1 /app/src .
+CMD ["./app"]  
