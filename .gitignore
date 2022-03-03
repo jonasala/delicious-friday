@@ -13,3 +13,15 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+#application users
+users.json
+
+#work orders files
+files/work-orders/*
+
+#keep the gitkeep
+!.gitkeep
+
+#env file for docker compose
+.env
